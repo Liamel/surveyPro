@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Plus, FileText, Settings, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { db } from '@/db/drizzle';
+import { surveys, surveyResponses } from '@/db/schema';
 
 export default async function CMSPage() {
   const { userId } = await auth();
@@ -12,6 +14,9 @@ export default async function CMSPage() {
   if (!userId) {
     redirect('/');
   }
+
+  const allSurveys = await db.select().from(surveys);
+  const allSurveyResponses = await db.select().from(surveyResponses);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -48,7 +53,7 @@ export default async function CMSPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -62,7 +67,7 @@ export default async function CMSPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.filter((survey) => survey.isActive).length}</p>
                 </div>
               </div>
             </CardContent>
@@ -76,7 +81,7 @@ export default async function CMSPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Draft Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">4</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.filter((survey) => !survey.isActive).length}</p>
                 </div>
               </div>
             </CardContent>
@@ -90,7 +95,7 @@ export default async function CMSPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Responses</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">1,234</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveyResponses.filter(surveyResponse => surveyResponse.isCompleted).length}</p>
                 </div>
               </div>
             </CardContent>
