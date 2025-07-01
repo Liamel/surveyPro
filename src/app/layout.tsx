@@ -10,6 +10,7 @@ import {
 } from '@clerk/nextjs'
 import { Toaster } from '@/components/ui/sonner'
 import UserCreator from '@/components/user-creator'
+import { CommandPalette } from '@/components/command-palette'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,6 +52,7 @@ export default function RootLayout({
           </header>
           {children}
           <UserCreator />
+          <CommandPalette />
           <Toaster />
         </body>
       </html>

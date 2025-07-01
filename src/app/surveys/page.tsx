@@ -57,9 +57,15 @@ export default function SurveysPage() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Available Surveys
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-4">
             Take part in our surveys and help us gather valuable insights. Your feedback makes a difference.
           </p>
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>Quick navigation:</span>
+            <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+              ⌘K
+            </kbd>
+          </div>
         </div>
 
         {/* Surveys Grid */}
