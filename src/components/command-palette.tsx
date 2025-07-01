@@ -84,7 +84,6 @@ export function CommandPalette() {
     }
   ];
 
-  // Filter commands based on search query
   const filteredCommands = commands.filter(command =>
     command.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     command.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -93,7 +92,6 @@ export function CommandPalette() {
     )
   );
 
-  // Handle keyboard shortcuts
   useHotkeys('cmd+k, ctrl+k', (e) => {
     e.preventDefault();
     setIsOpen(true);
@@ -103,7 +101,6 @@ export function CommandPalette() {
     setIsOpen(false);
   }, { enableOnFormTags: true });
 
-  // Handle arrow keys and enter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -137,7 +134,6 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, selectedIndex, filteredCommands]);
 
-  // Reset state when dialog opens/closes
   useEffect(() => {
     if (isOpen) {
       setSearchQuery('');

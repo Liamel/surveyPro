@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,23 +19,42 @@ interface Survey {
 export default function SurveysPage() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate API calls
+    if (hasLoadedRef.current) {
+      return;
+    }
+
     const loadSurveys = async () => {
       try {
+        hasLoadedRef.current = true;
+        setError(null);
+        
+        console.log('🔍 Making API call to /api/surveys?isActive=true');
         const response = await fetch('/api/surveys?isActive=true');
         if (response.ok) {
           const data = await response.json();
           setSurveys(data);
+        } else {
+          setError('Failed to load surveys');
         }
       } catch (error) {
         console.error('Error loading surveys:', error);
+        setError('Failed to load surveys');
       } finally {
         setIsLoading(false);
       }
     };
 
     loadSurveys();
+
+    // Cleanup function to reset the ref if component unmounts
+    return () => {
+      hasLoadedRef.current = false;
+    };
   }, []);
 
   if (isLoading) {
@@ -44,6 +63,28 @@ export default function SurveysPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">Loading surveys...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="p-4 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <FileText className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Error loading surveys
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Try Again
+          </Button>
         </div>
       </div>
     );

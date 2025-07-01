@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Users, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 export default function Home() {
   return (
@@ -22,30 +23,38 @@ export default function Home() {
             Create, manage, and analyze surveys with ease. Professional survey platform for modern businesses.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <SignedOut>
-              <SignInButton>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <Button variant="outline" size="lg" className="px-8 py-3">
-                Hello
+          <Suspense fallback={
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3" disabled>
+                Loading...
               </Button>
-            </SignedOut>
-            <SignedIn>
-              <Link href="/cms">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
-                  Go to CMS
-                </Button>
-              </Link>
-              <Link href="/surveys">
+            </div>
+          }>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <SignedOut>
+                <SignInButton>
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
+                    Sign In
+                  </Button>
+                </SignInButton>
                 <Button variant="outline" size="lg" className="px-8 py-3">
-                  View Surveys
+                  Hello
                 </Button>
-              </Link>
-            </SignedIn>
-          </div>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/cms">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
+                    Go to CMS
+                  </Button>
+                </Link>
+                <Link href="/surveys">
+                  <Button variant="outline" size="lg" className="px-8 py-3">
+                    View Surveys
+                  </Button>
+                </Link>
+              </SignedIn>
+            </div>
+          </Suspense>
         </div>
 
         {/* Features Section */}

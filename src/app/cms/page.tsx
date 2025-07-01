@@ -1,12 +1,15 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, Settings, BarChart3 } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '@/db/drizzle';
-import { surveys, surveyResponses } from '@/db/schema';
+import StatsCards from '@/components/cms/stats-cards';
+import StatsCardsSkeleton from '@/components/cms/stats-cards-skeleton';
+import RecentSurveys from '@/components/cms/recent-surveys';
+import RecentSurveysSkeleton from '@/components/cms/recent-surveys-skeleton';
+import QuickActions from '@/components/cms/quick-actions';
+import RecentActivity from '@/components/cms/recent-activity';
 
 export default async function CMSPage() {
   const { userId } = await auth();
@@ -14,9 +17,6 @@ export default async function CMSPage() {
   if (!userId) {
     redirect('/');
   }
-
-  const allSurveys = await db.select().from(surveys);
-  const allSurveyResponses = await db.select().from(surveyResponses);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -43,176 +43,20 @@ export default async function CMSPage() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FileText className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Quick Stats - Wrapped in Suspense for streaming */}
+        <Suspense fallback={<StatsCardsSkeleton />}>
+          <StatsCards />
+        </Suspense>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.filter((survey) => survey.isActive).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Recent Surveys - Wrapped in Suspense for streaming */}
+        <Suspense fallback={<RecentSurveysSkeleton />}>
+          <RecentSurveys />
+        </Suspense>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Settings className="h-6 w-6 text-purple-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Draft Surveys</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveys.filter((survey) => !survey.isActive).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-orange-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Responses</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{allSurveyResponses.filter(surveyResponse => surveyResponse.isCompleted).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Surveys */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Surveys</CardTitle>
-            <CardDescription>Your recently created or updated surveys</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Sample survey items - these would be populated from the database */}
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">Customer Satisfaction Survey</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Created 2 days ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary">Active</Badge>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <FileText className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">Product Feedback Form</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Created 1 week ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline">Draft</Badge>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
+        {/* Quick Actions and Recent Activity - No data fetching needed */}
         <div className="mt-8 grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common tasks and shortcuts</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Link href="/cms/create">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create New Survey
-                </Button>
-              </Link>
-              <Link href="/cms/manage">
-                <Button variant="outline" className="w-full justify-start">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage Surveys
-                </Button>
-              </Link>
-              <Link href="/cms/templates">
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Use Template
-                </Button>
-              </Link>
-              <Link href="/cms/analytics">
-                <Button variant="outline" className="w-full justify-start">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Analytics
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest actions and updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Survey &ldquo;Customer Feedback&rdquo; received 5 new responses
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Survey &ldquo;Product Launch&rdquo; was published
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    New template &ldquo;Employee Satisfaction&rdquo; was added
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <QuickActions />
+          <RecentActivity />
         </div>
       </div>
     </div>
