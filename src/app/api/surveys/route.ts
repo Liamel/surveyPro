@@ -56,6 +56,8 @@ export async function GET(request: Request) {
       allSurveys = await db.select().from(surveys);
     }
 
+    // For now, return basic survey data
+    // TODO: Add question counts and response counts with proper joins
     return Response.json(allSurveys);
   } catch (error) {
     console.error("Error fetching surveys:", error);

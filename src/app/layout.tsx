@@ -9,6 +9,7 @@ import {
   UserButton,
 } from '@clerk/nextjs'
 import { Toaster } from '@/components/ui/sonner'
+import UserCreator from '@/components/user-creator'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,6 +50,7 @@ export default function RootLayout({
             </SignedIn>
           </header>
           {children}
+          <UserCreator />
           <Toaster />
         </body>
       </html>

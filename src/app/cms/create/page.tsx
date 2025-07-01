@@ -25,7 +25,7 @@ export default function CreateSurveyPage() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<SurveyForm>({
+  } = useForm({
     resolver: zodResolver(surveyFormSchema),
     defaultValues: {
       title: '',
@@ -84,16 +84,26 @@ export default function CreateSurveyPage() {
           questionType: question.questionType,
           orderIndex: i,
           isRequired: question.isRequired,
-          options: question.questionType === 'multiple_choice' ? question.options : null,
+          options: question.questionType === 'multiple_choice' ? question.options?.map((option: { text: string }, index: number) => ({
+            id: `option-${i}-${index}`,
+            text: option.text,
+          })) : null,
         };
 
-        await fetch('/api/questions', {
+        console.log(`Creating question ${i + 1}:`, questionData);
+
+        const questionResponse = await fetch('/api/questions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(questionData),
         });
+
+        if (!questionResponse.ok) {
+          console.error('Failed to create question:', await questionResponse.text());
+          throw new Error(`Failed to create question ${i + 1}`);
+        }
       }
 
       router.push('/cms');

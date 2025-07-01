@@ -22,12 +22,20 @@ export default async function CMSPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Survey Management</h1>
             <p className="text-gray-600 dark:text-gray-300">Create and manage your surveys</p>
           </div>
-          <Link href="/cms/create">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Survey
-            </Button>
-          </Link>
+          <div className="flex space-x-2">
+            <Link href="/cms/manage">
+              <Button variant="outline">
+                <Settings className="h-4 w-4 mr-2" />
+                Manage Surveys
+              </Button>
+            </Link>
+            <Link href="/cms/create">
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Survey
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Quick Stats */}
@@ -149,6 +157,12 @@ export default async function CMSPage() {
                 <Button variant="outline" className="w-full justify-start">
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Survey
+                </Button>
+              </Link>
+              <Link href="/cms/manage">
+                <Button variant="outline" className="w-full justify-start">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Surveys
                 </Button>
               </Link>
               <Link href="/cms/templates">

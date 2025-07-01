@@ -54,7 +54,7 @@ export const surveyFormSchema = z.object({
   questions: z.array(z.object({
     questionText: z.string().min(1, 'Question text is required'),
     questionType: z.enum(['multiple_choice', 'text', 'rating']),
-    isRequired: z.boolean().optional().default(true),
+    isRequired: z.boolean().default(true),
     options: z.array(z.object({
       text: z.string().min(1, 'Option text is required'),
     })).optional(),
