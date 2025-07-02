@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 import { db } from "@/db/drizzle"
 import { users } from "@/db/schema"
 import { userSchema } from "@/lib/schemas"
+import { revalidateUser } from "@/lib/cache"
 
 export async function POST() {
   try {
@@ -22,7 +23,7 @@ export async function POST() {
 
     const validatedUser = userSchema.parse(userData)
 
-    await db
+    const result = await db
       .insert(users)
       .values(validatedUser)
       .onConflictDoUpdate({
@@ -34,6 +35,12 @@ export async function POST() {
           updatedAt: new Date(),
         },
       })
+      .returning();
+
+    // Revalidate user cache if user was created/updated
+    if (result.length > 0) {
+      revalidateUser(validatedUser.clerkId);
+    }
 
     return new Response("User created/updated successfully", { status: 200 })
   } catch (error) {

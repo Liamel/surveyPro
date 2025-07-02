@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
 import { surveyResponses, surveys, users } from "@/db/schema";
 import { createSurveyResponseSchema } from "@/lib/schemas";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -48,12 +48,17 @@ export async function POST(request: Request) {
       })
       .returning();
 
+    // Revalidate related cache tags
+    revalidateSurveyResponses(validatedData.surveyId);
+
     return Response.json(newResponse);
   } catch (error) {
     console.error("Error creating survey response:", error);
     return new Response("Internal server error", { status: 500 });
   }
 }
+
+import { getSurveyResponsesCached, revalidateSurveyResponses, CACHE_TAGS } from "@/lib/cache";
 
 export async function GET(request: Request) {
   try {
@@ -65,23 +70,23 @@ export async function GET(request: Request) {
       return new Response("Survey ID is required", { status: 400 });
     }
 
-    let responses;
+    // For now, we'll use the cached function for all responses
+    // TODO: Add separate cached functions for completed/incomplete responses if needed
+    const responses = await getSurveyResponsesCached(surveyId)();
+
+    // Filter by completion status if specified
+    let filteredResponses = responses;
     if (isCompleted !== null) {
-      responses = await db
-        .select()
-        .from(surveyResponses)
-        .where(and(
-          eq(surveyResponses.surveyId, surveyId),
-          eq(surveyResponses.isCompleted, isCompleted === "true")
-        ));
-    } else {
-      responses = await db
-        .select()
-        .from(surveyResponses)
-        .where(eq(surveyResponses.surveyId, surveyId));
+      filteredResponses = responses.filter(response => 
+        response.isCompleted === (isCompleted === "true")
+      );
     }
 
-    return Response.json(responses);
+    const response = Response.json(filteredResponses);
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    response.headers.set('X-Cache-Tags', CACHE_TAGS.SURVEY_RESPONSES(surveyId));
+    
+    return response;
   } catch (error) {
     console.error("Error fetching survey responses:", error);
     return new Response("Internal server error", { status: 500 });

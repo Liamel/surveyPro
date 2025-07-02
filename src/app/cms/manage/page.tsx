@@ -4,20 +4,22 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '@/db/drizzle';
-import { surveys } from '@/db/schema';
-import { cache } from 'react';
+import { getSurveysCached } from '@/lib/cache';
 import ManageSurveysClient from './manage-surveys-client';
 
-// Cache the surveys query
-const getSurveys = cache(async () => {
-  const surveysData = await db.select().from(surveys);
+// Get surveys from cached data
+const getSurveys = async () => {
+  const surveysData = await getSurveysCached();
   return surveysData.map(survey => ({
     ...survey,
-    createdAt: survey.createdAt.toISOString(),
-    updatedAt: survey.updatedAt.toISOString(),
+    createdAt: typeof survey.createdAt === 'string' 
+      ? survey.createdAt 
+      : survey.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: typeof survey.updatedAt === 'string' 
+      ? survey.updatedAt 
+      : survey.updatedAt?.toISOString() || new Date().toISOString(),
   }));
-});
+};
 
 export default async function ManageSurveysPage() {
   const { userId } = await auth();

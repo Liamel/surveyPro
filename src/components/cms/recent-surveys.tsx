@@ -2,22 +2,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileText, Settings } from 'lucide-react';
-import { db } from '@/db/drizzle';
-import { surveys } from '@/db/schema';
-import { desc } from 'drizzle-orm';
 import Link from 'next/link';
-import { cache } from 'react';
+import { getSurveysCached } from '@/lib/cache';
 
-// Cache the recent surveys query
-
-
-const getRecentSurveys = cache(async () => {
-  return await db
-    .select()
-    .from(surveys)
-    .orderBy(desc(surveys.createdAt))
-    .limit(5);
-});
+const getRecentSurveys = async () => {
+  const allSurveys = await getSurveysCached();
+  return allSurveys.slice(0, 5).map(survey => ({
+    ...survey,
+    createdAt: typeof survey.createdAt === 'string' 
+      ? survey.createdAt 
+      : survey.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: typeof survey.updatedAt === 'string' 
+      ? survey.updatedAt 
+      : survey.updatedAt?.toISOString() || new Date().toISOString(),
+  }));
+};
 
 export default async function RecentSurveys() {
   const recentSurveys = await getRecentSurveys();

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
 import { surveyResponses } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidateSurveyResponses } from "@/lib/cache";
 
 export async function PUT(
   request: Request,
@@ -28,6 +29,9 @@ export async function PUT(
     if (!updatedResponse) {
       return new Response("Survey response not found", { status: 404 });
     }
+
+    // Revalidate related cache tags
+    revalidateSurveyResponses(updatedResponse.surveyId);
 
     return Response.json(updatedResponse);
   } catch (error) {

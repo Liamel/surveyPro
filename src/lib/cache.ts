@@ -153,12 +153,13 @@ export const getSurveyResponsesCached = (surveyId: string) => createCachedQuery(
 export const getAllSurveyResponsesCompletedCached = createCachedQuery(
   async () => {
     const [result] = await db.select({ count: count() }).from(surveyResponses).where(eq(surveyResponses.isCompleted, true));
-    console.log(result?.count);
     return result?.count || 0;
   },
   [CACHE_TAGS.SURVEY_RESPONSES_COMPLETED],
   CACHE_DURATIONS.SHORT
 );
+
+
 
 
 export function revalidateSurveys() {

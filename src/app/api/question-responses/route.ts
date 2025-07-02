@@ -3,6 +3,7 @@ import { db } from "@/db/drizzle";
 import { questionResponses, surveyResponses, questions } from "@/db/schema";
 import { submitQuestionResponseSchema } from "@/lib/schemas";
 import { eq, and } from "drizzle-orm";
+import { revalidateSurveyResponses } from "@/lib/cache";
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +37,6 @@ export async function POST(request: Request) {
       return new Response("Question not found or invalid", { status: 404 });
     }
 
-    // Check if response already exists
     const [existingResponse] = await db
       .select()
       .from(questionResponses)
@@ -48,7 +48,6 @@ export async function POST(request: Request) {
 
     let result;
     if (existingResponse) {
-      // Update existing response
       [result] = await db
         .update(questionResponses)
         .set({
@@ -68,6 +67,8 @@ export async function POST(request: Request) {
         })
         .returning();
     }
+
+    revalidateSurveyResponses(surveyResponse.surveyId);
 
     return Response.json(result);
   } catch (error) {

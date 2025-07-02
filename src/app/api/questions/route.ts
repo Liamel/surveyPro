@@ -41,12 +41,16 @@ export async function POST(request: Request) {
       .values(validatedData)
       .returning();
 
+    revalidateSurveyQuestions(validatedData.surveyId);
+
     return Response.json(newQuestion);
   } catch (error) {
     console.error("Error creating question:", error);
     return new Response("Internal server error", { status: 500 });
   }
 }
+
+import { getSurveyQuestionsCached, revalidateSurveyQuestions, CACHE_TAGS } from "@/lib/cache";
 
 export async function GET(request: Request) {
   try {
@@ -57,13 +61,13 @@ export async function GET(request: Request) {
       return new Response("Survey ID is required", { status: 400 });
     }
 
-    const surveyQuestions = await db
-      .select()
-      .from(questions)
-      .where(eq(questions.surveyId, surveyId))
-      .orderBy(questions.orderIndex);
+    const surveyQuestions = await getSurveyQuestionsCached(surveyId)();
 
-    return Response.json(surveyQuestions);
+    const response = Response.json(surveyQuestions);
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    response.headers.set('X-Cache-Tags', CACHE_TAGS.QUESTIONS(surveyId));
+    
+    return response;
   } catch (error) {
     console.error("Error fetching questions:", error);
     return new Response("Internal server error", { status: 500 });
