@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { match } from 'ts-pattern';
 import { surveysApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,20 +29,11 @@ export function SurveysList() {
   const loadSurveys = async () => {
     try {
       setLoading(true);
-      let data: Survey[];
       
-      // This demonstrates the fetch with cache tags approach
-      // The API client automatically handles caching with appropriate tags
-      switch (filter) {
-        case 'active':
-          data = await surveysApi.getActive() as Survey[];
-          break;
-        case 'inactive':
-          data = await surveysApi.getInactive() as Survey[];
-          break;
-        default:
-          data = await surveysApi.getAll() as Survey[];
-      }
+      const data = await match(filter)
+        .with('active', () => surveysApi.getActive())
+        .with('inactive', () => surveysApi.getInactive())
+        .otherwise(() => surveysApi.getAll()) as Survey[];
       
       setSurveys(data);
     } catch (error) {
@@ -58,9 +50,6 @@ export function SurveysList() {
         description: 'A new survey created via API',
         isActive: true,
       });
-      
-      // The cache will be automatically revalidated by the API route
-      // But we can also manually refresh if needed
       await loadSurveys();
     } catch (error) {
       console.error('Error creating survey:', error);
