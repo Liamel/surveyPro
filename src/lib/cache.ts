@@ -1,9 +1,8 @@
 import { revalidateTag, unstable_cache } from 'next/cache';
 import { db } from '@/db/drizzle';
 import { surveys, users, questions, surveyResponses } from '@/db/schema';
-import { eq, desc, asc } from 'drizzle-orm';
+import { eq, desc, asc, count } from 'drizzle-orm';
 
-// Cache tags for different data types
 export const CACHE_TAGS = {
   SURVEYS: 'surveys',
   SURVEY: (id: string) => `survey-${id}`,
@@ -12,15 +11,15 @@ export const CACHE_TAGS = {
   INACTIVE_SURVEYS: 'inactive-surveys',
   QUESTIONS: (surveyId: string) => `questions-${surveyId}`,
   SURVEY_RESPONSES: (surveyId: string) => `survey-responses-${surveyId}`,
+  SURVEY_RESPONSES_COMPLETED: 'survey-responses-completed',
   USER: (userId: string) => `user-${userId}`,
 } as const;
 
-// Cache duration constants
 export const CACHE_DURATIONS = {
-  SHORT: 60, // 1 minute
-  MEDIUM: 300, // 5 minutes
-  LONG: 3600, // 1 hour
-  VERY_LONG: 86400, // 24 hours
+  SHORT: 60,
+  MEDIUM: 300,
+  LONG: 3600,
+  VERY_LONG: 86400,
 } as const;
 
 // Generic cache wrapper for database queries
@@ -39,7 +38,6 @@ export function createCachedQuery<T>(
   );
 }
 
-// Survey queries with caching
 export const getSurveysCached = createCachedQuery(
   async () => {
     return await db
@@ -140,7 +138,6 @@ export const getUserByClerkIdCached = (clerkId: string) => createCachedQuery(
   CACHE_DURATIONS.LONG
 );
 
-// Survey responses queries with caching
 export const getSurveyResponsesCached = (surveyId: string) => createCachedQuery(
   async () => {
     return await db
@@ -153,7 +150,17 @@ export const getSurveyResponsesCached = (surveyId: string) => createCachedQuery(
   CACHE_DURATIONS.SHORT
 );
 
-// Revalidation functions
+export const getAllSurveyResponsesCompletedCached = createCachedQuery(
+  async () => {
+    const [result] = await db.select({ count: count() }).from(surveyResponses).where(eq(surveyResponses.isCompleted, true));
+    console.log(result?.count);
+    return result?.count || 0;
+  },
+  [CACHE_TAGS.SURVEY_RESPONSES_COMPLETED],
+  CACHE_DURATIONS.SHORT
+);
+
+
 export function revalidateSurveys() {
   revalidateTag(CACHE_TAGS.SURVEYS);
   revalidateTag(CACHE_TAGS.ACTIVE_SURVEYS);
@@ -184,7 +191,6 @@ export function revalidateUser(userId: string) {
   revalidateTag(CACHE_TAGS.USER(userId));
 }
 
-// Helper function to fetch data with cache tags
 export async function fetchWithCache<T>(
   url: string,
   tags: string[],
