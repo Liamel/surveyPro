@@ -5,13 +5,22 @@ import { FileText, Settings } from 'lucide-react';
 import { db } from '@/db/drizzle';
 import { surveys } from '@/db/schema';
 import { desc } from 'drizzle-orm';
+import Link from 'next/link';
+import { cache } from 'react';
 
-export default async function RecentSurveys() {
-  const recentSurveys = await db
+// Cache the recent surveys query
+
+
+const getRecentSurveys = cache(async () => {
+  return await db
     .select()
     .from(surveys)
     .orderBy(desc(surveys.createdAt))
     .limit(5);
+});
+
+export default async function RecentSurveys() {
+  const recentSurveys = await getRecentSurveys();
 
   return (
     <Card>
@@ -39,9 +48,11 @@ export default async function RecentSurveys() {
                   <Badge variant={survey.isActive ? "secondary" : "outline"}>
                     {survey.isActive ? "Active" : "Draft"}
                   </Badge>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
+                  <Link href={`/cms/manage`}>
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ))

@@ -27,7 +27,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -53,7 +53,7 @@ export async function PATCH(
     const [existingSurvey] = await db
       .select()
       .from(surveys)
-      .where(eq(surveys.id, params.id))
+      .where(eq(surveys.id, (await params).id))
       .limit(1);
 
     if (!existingSurvey) {
@@ -70,8 +70,8 @@ export async function PATCH(
       .set({ 
         isActive,
         updatedAt: new Date()
-      })
-      .where(eq(surveys.id, params.id))
+      })  
+      .where(eq(surveys.id, (await params).id))
       .returning();
 
     return Response.json(updatedSurvey);
@@ -83,7 +83,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -106,7 +106,7 @@ export async function DELETE(
     const [existingSurvey] = await db
       .select()
       .from(surveys)
-      .where(eq(surveys.id, params.id))
+      .where(eq(surveys.id, (await params).id))
       .limit(1);
 
     if (!existingSurvey) {
@@ -120,7 +120,7 @@ export async function DELETE(
     // Delete survey (this will cascade to questions and responses)
     await db
       .delete(surveys)
-      .where(eq(surveys.id, params.id));
+      .where(eq(surveys.id, (await params).id));
 
     return new Response("Survey deleted successfully", { status: 200 });
   } catch (error) {
