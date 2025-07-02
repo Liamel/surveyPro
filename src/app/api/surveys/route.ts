@@ -3,19 +3,13 @@ import { db } from "@/db/drizzle";
 import { surveys, users } from "@/db/schema";
 import { createSurveySchema } from "@/lib/schemas";
 import { eq } from "drizzle-orm";
-import { cache } from "react";
-
-// Cache the surveys query
-const getSurveys = cache(async (isActive?: string | null) => {
-  if (isActive !== null) {
-    return await db
-      .select()
-      .from(surveys)
-      .where(eq(surveys.isActive, isActive === "true"));
-  } else {
-    return await db.select().from(surveys);
-  }
-});
+import { 
+  getSurveysCached, 
+  getActiveSurveysCached, 
+  getInactiveSurveysCached,
+  revalidateSurveys,
+  CACHE_TAGS 
+} from "@/lib/cache";
 
 export async function POST(request: Request) {
   try {
@@ -47,6 +41,9 @@ export async function POST(request: Request) {
       })
       .returning();
 
+    // Revalidate related cache tags
+    revalidateSurveys();
+
     return Response.json(newSurvey);
   } catch (error) {
     console.error("Error creating survey:", error);
@@ -59,11 +56,30 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const isActive = searchParams.get("isActive");
 
-    const allSurveys = await getSurveys(isActive);
+    let surveysData;
 
-    // Add caching headers for better performance
-    const response = Response.json(allSurveys);
-    response.headers.set('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
+    // Use appropriate cached query based on filter
+    if (isActive === "true") {
+      surveysData = await getActiveSurveysCached();
+    } else if (isActive === "false") {
+      surveysData = await getInactiveSurveysCached();
+    } else {
+      surveysData = await getSurveysCached();
+    }
+
+    // Return response with cache headers
+    const response = Response.json(surveysData);
+    
+    // Set appropriate cache headers based on the query
+    const cacheTags = isActive === "true" 
+      ? [CACHE_TAGS.ACTIVE_SURVEYS]
+      : isActive === "false"
+      ? [CACHE_TAGS.INACTIVE_SURVEYS]
+      : [CACHE_TAGS.SURVEYS];
+
+    // Add cache control headers for better performance
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    response.headers.set('X-Cache-Tags', cacheTags.join(','));
     
     return response;
   } catch (error) {
