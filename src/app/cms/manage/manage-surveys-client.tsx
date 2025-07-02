@@ -77,7 +77,7 @@ export default function ManageSurveysClient({ initialSurveys }: ManageSurveysCli
   const toggleSurveyStatus = async (surveyId: string, currentStatus: boolean) => {
     try {
       const response = await fetch(`/api/surveys/${surveyId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -158,7 +158,6 @@ export default function ManageSurveysClient({ initialSurveys }: ManageSurveysCli
         </CardContent>
       </Card>
 
-      {/* Surveys List */}
       {filteredSurveys.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
@@ -226,7 +225,6 @@ export default function ManageSurveysClient({ initialSurveys }: ManageSurveysCli
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    {/* Toggle Active Status */}
                     <div className="flex items-center space-x-2">
                       <Switch
                         checked={survey.isActive}

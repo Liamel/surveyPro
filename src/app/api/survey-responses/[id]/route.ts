@@ -3,9 +3,9 @@ import { db } from "@/db/drizzle";
 import { surveyResponses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function PATCH(
+export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -22,7 +22,7 @@ export async function PATCH(
         isCompleted,
         completedAt: completedAt ? new Date(completedAt) : null,
       })
-      .where(eq(surveyResponses.id, params.id))
+      .where(eq(surveyResponses.id, (await params).id))
       .returning();
 
     if (!updatedResponse) {

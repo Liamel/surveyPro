@@ -10,19 +10,17 @@ import {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    // Use cached query for better performance
     const survey = await getSurveyByIdCached(id)();
 
     if (!survey) {
       return new Response("Survey not found", { status: 404 });
     }
 
-    // Return response with cache headers
     const response = Response.json(survey);
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
     response.headers.set('X-Cache-Tags', CACHE_TAGS.SURVEY(id));
@@ -36,7 +34,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -44,7 +42,7 @@ export async function PUT(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Get user from database
@@ -84,7 +82,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -92,7 +90,7 @@ export async function DELETE(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Get user from database
     const [user] = await db

@@ -1,7 +1,6 @@
 import { pgTable, text, timestamp, uuid, integer, boolean, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// Users table
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   clerkId: text('clerk_id').unique().notNull(),
@@ -13,7 +12,6 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Surveys table
 export const surveys = pgTable('surveys', {
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
@@ -24,7 +22,6 @@ export const surveys = pgTable('surveys', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Questions table
 export const questions = pgTable('questions', {
   id: uuid('id').defaultRandom().primaryKey(),
   surveyId: uuid('survey_id').references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
@@ -37,7 +34,6 @@ export const questions = pgTable('questions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Survey responses table
 export const surveyResponses = pgTable('survey_responses', {
   id: uuid('id').defaultRandom().primaryKey(),
   surveyId: uuid('survey_id').references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
@@ -47,7 +43,6 @@ export const surveyResponses = pgTable('survey_responses', {
   isCompleted: boolean('is_completed').default(false).notNull(),
 });
 
-// Question responses table
 export const questionResponses = pgTable('question_responses', {
   id: uuid('id').defaultRandom().primaryKey(),
   surveyResponseId: uuid('survey_response_id').references(() => surveyResponses.id, { onDelete: 'cascade' }).notNull(),
@@ -56,7 +51,6 @@ export const questionResponses = pgTable('question_responses', {
   answeredAt: timestamp('answered_at').defaultNow().notNull(),
 });
 
-// Relations
 export const usersRelations = relations(users, ({ many }) => ({
   surveys: many(surveys),
   surveyResponses: many(surveyResponses),

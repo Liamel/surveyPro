@@ -20,10 +20,8 @@ export async function POST() {
       role: 'user' as const,
     }
 
-    // Validate user data
     const validatedUser = userSchema.parse(userData)
 
-    // Insert or update user
     await db
       .insert(users)
       .values(validatedUser)
