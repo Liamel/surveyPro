@@ -22,7 +22,6 @@ export const CACHE_DURATIONS = {
   VERY_LONG: 86400,
 } as const;
 
-// Generic cache wrapper for database queries
 export function createCachedQuery<T>(
   queryFn: () => Promise<T>,
   tags: string[],
@@ -98,7 +97,7 @@ export const getUserSurveysCached = (userId: string) => createCachedQuery(
   CACHE_DURATIONS.MEDIUM
 );
 
-// Question queries with caching
+
 export const getSurveyQuestionsCached = (surveyId: string) => createCachedQuery(
   async () => {
     return await db
@@ -111,7 +110,6 @@ export const getSurveyQuestionsCached = (surveyId: string) => createCachedQuery(
   CACHE_DURATIONS.MEDIUM
 );
 
-// User queries with caching
 export const getUserByIdCached = (userId: string) => createCachedQuery(
   async () => {
     const [user] = await db
