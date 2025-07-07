@@ -22,6 +22,7 @@ export const surveys = pgTable('surveys', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+
 export const questions = pgTable('questions', {
   id: uuid('id').defaultRandom().primaryKey(),
   surveyId: uuid('survey_id').references(() => surveys.id, { onDelete: 'cascade' }).notNull(),

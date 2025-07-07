@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 
-export default function SurveyCompletePage({
+export default async function SurveyCompletePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
       <div className="container mx-auto px-4 py-8 max-w-md">
@@ -28,7 +29,7 @@ export default function SurveyCompletePage({
           <CardContent className="space-y-4">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Response ID:</strong> {params.id}
+                <strong>Response ID:</strong> {id}
               </p>
               <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
                 <strong>Completed:</strong> {new Date().toLocaleDateString()}
