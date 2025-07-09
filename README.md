@@ -1,6 +1,6 @@
 # SurveyPro - Full-Stack Survey Application
 
-A modern, full-stack survey application built with Next.js, TypeScript, Tailwind CSS, and Neon Database. Features Clerk authentication, Drizzle ORM, and shadcn/ui components.
+A modern, full-stack survey application built with Next.js, TypeScript, Tailwind CSS, and Neon Database. Features Clerk authentication, Drizzle ORM, shadcn/ui components, and AI-powered survey generation.
 
 ## Features
 
@@ -12,6 +12,7 @@ A modern, full-stack survey application built with Next.js, TypeScript, Tailwind
 - 🎨 **Modern UI** - Beautiful interface built with shadcn/ui and Tailwind CSS
 - 📱 **Responsive Design** - Works perfectly on desktop and mobile devices
 - 🔒 **Type Safety** - Full TypeScript support with Zod validation
+- 🤖 **AI Survey Generation** - Generate surveys using AI with natural language prompts
 
 ## Tech Stack
 
@@ -23,6 +24,7 @@ A modern, full-stack survey application built with Next.js, TypeScript, Tailwind
 - **Validation**: Zod
 - **Forms**: React Hook Form
 - **Icons**: Lucide React
+- **AI**: Vercel AI SDK, OpenAI
 
 ## Prerequisites
 
@@ -53,6 +55,9 @@ DATABASE_URL="your-neon-database-url"
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-publishable-key"
 CLERK_SECRET_KEY="your-clerk-secret-key"
 
+# AI Survey Generation
+OPENAI_API_KEY="your-openai-api-key"
+
 # Next.js
 NEXTAUTH_URL="http://localhost:3000"
 ```
@@ -76,7 +81,17 @@ npm run db:migrate
 4. Add your domain to allowed origins
 5. Copy your publishable and secret keys to `.env.local`
 
-### 5. Start Development Server
+### 5. AI Setup (Optional)
+
+To use the AI survey generation feature:
+
+1. Get an OpenAI API key from [platform.openai.com](https://platform.openai.com)
+2. Add your API key to `.env.local`:
+   ```env
+   OPENAI_API_KEY="your-openai-api-key"
+   ```
+
+### 6. Start Development Server
 
 ```bash
 npm run dev
@@ -126,6 +141,9 @@ surveypro/
 ### Question Responses
 - `POST /api/question-responses` - Submit a question answer
 
+### AI Survey Generation
+- `POST /api/generate-survey` - Generate survey using AI
+
 ### Users
 - `POST /api/users/create` - Create/update user from Clerk
 
@@ -136,8 +154,9 @@ surveypro/
 1. **Sign In**: Use the "Sign In" button on the homepage
 2. **Access CMS**: Click "Go to CMS" after signing in
 3. **Create Survey**: Click "Create Survey" and fill out the form
-4. **Add Questions**: Add multiple questions with different types
-5. **Publish**: Your survey will be available for respondents
+4. **Generate with AI** (Optional): Click "Generate Survey" button and describe your survey in natural language
+5. **Add Questions**: Add multiple questions with different types
+6. **Publish**: Your survey will be available for respondents
 
 ### For Survey Respondents
 

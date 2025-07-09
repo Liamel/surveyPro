@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
 import { surveyFormSchema, type SurveyForm } from '@/lib/schemas';
 import Link from 'next/link';
+import { GenerateSurveyDialog } from '@/components/generate-survey-dialog';
 
 export default function CreateSurveyPage() {
   const router = useRouter();
@@ -135,6 +136,54 @@ export default function CreateSurveyPage() {
     }
   };
 
+  const handleSurveyGenerated = (generatedSurvey: {
+    title: string;
+    description: string;
+    questions: Array<{
+      questionText: string;
+      questionType: 'multiple_choice' | 'text' | 'rating';
+      isRequired: boolean;
+      options?: Array<{ text: string }>;
+    }>;
+  }) => {
+    // Set the survey title and description
+    const event = {
+      target: {
+        name: 'title',
+        value: generatedSurvey.title,
+      },
+    };
+    register('title').onChange(event);
+
+    const descEvent = {
+      target: {
+        name: 'description',
+        value: generatedSurvey.description || '',
+      },
+    };
+    register('description').onChange(descEvent);
+
+    // Clear existing questions
+    while (fields.length > 0) {
+      remove(0);
+    }
+
+    // Add generated questions
+    generatedSurvey.questions.forEach((question) => {
+      append({
+        questionText: question.questionText,
+        questionType: question.questionType,
+        isRequired: question.isRequired,
+        options: question.options || [
+          { text: '' },
+          { text: '' },
+          { text: '' },
+          { text: '' },
+        ],
+      });
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -152,6 +201,7 @@ export default function CreateSurveyPage() {
               <p className="text-gray-600 dark:text-gray-300">Design your survey with questions and options</p>
             </div>
           </div>
+          <GenerateSurveyDialog onSurveyGenerated={handleSurveyGenerated} />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
