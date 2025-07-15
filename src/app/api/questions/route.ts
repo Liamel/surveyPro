@@ -1,8 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { questions, surveys, users } from "@/db/schema";
+import { questions, surveys } from "@/db/schema";
 import { createQuestionSchema } from "@/lib/schemas";
 import { eq } from "drizzle-orm";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -14,14 +15,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = createQuestionSchema.parse(body);
 
-    // Verify user owns the survey
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.clerkId, userId))
-      .limit(1);
-
-    if (!user) {
+    // Get current user and check permissions
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
       return new Response("User not found", { status: 404 });
     }
 
@@ -31,8 +27,16 @@ export async function POST(request: Request) {
       .where(eq(surveys.id, validatedData.surveyId))
       .limit(1);
 
-    if (!survey || survey.createdBy !== user.id) {
-      return new Response("Survey not found or access denied", { status: 404 });
+    if (!survey) {
+      return new Response("Survey not found", { status: 404 });
+    }
+
+    // Check if user is moderator/admin or owns the survey
+    const isModeratorOrAdmin = currentUser.role === 'moderator' || currentUser.role === 'admin';
+    const isOwner = survey.createdBy === currentUser.id;
+    
+    if (!isModeratorOrAdmin && !isOwner) {
+      return new Response("Access denied", { status: 403 });
     }
 
     // Create question

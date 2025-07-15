@@ -6,7 +6,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  role: z.enum(['user', 'admin']).default('user'),
+  role: z.enum(['user', 'moderator', 'admin']).default('user'),
 });
 
 // Survey schemas

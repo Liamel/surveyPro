@@ -12,14 +12,14 @@ The SurveyPro app includes a powerful command palette that allows users to quick
 
 ## Available Commands
 
-| Command | Description | Route |
-|---------|-------------|-------|
-| Go to Home | Navigate to the home page | `/` |
-| Browse Surveys | View all available surveys | `/surveys` |
-| CMS Dashboard | Access the content management system | `/cms` |
-| Create Survey | Create a new survey | `/cms/create` |
-| Manage Surveys | Manage existing surveys | `/cms/manage` |
-| User Management | Manage users and permissions | `/cms` |
+| Command | Description | Route | Access |
+|---------|-------------|-------|--------|
+| Go to Home | Navigate to the home page | `/` | All users |
+| Browse Surveys | View all available surveys | `/surveys` | All users |
+| CMS Dashboard | Access the content management system | `/cms` | All users |
+| Create Survey | Create a new survey | `/cms/create` | Moderators & Admins |
+| Manage Surveys | Manage existing surveys | `/cms/manage` | Moderators & Admins |
+| User Management | Manage users and permissions | `/cms/users` | Admins only |
 
 ## Usage
 
@@ -32,10 +32,17 @@ The SurveyPro app includes a powerful command palette that allows users to quick
 ## Keyboard Shortcuts
 
 - `Cmd+K` / `Ctrl+K`: Open command palette
+- `Cmd+U` / `Ctrl+U`: Quick access to User Management (admin only)
 - `Escape`: Close command palette
 - `↑/↓`: Navigate through commands
 - `Enter`: Execute selected command
 - `Type`: Search/filter commands
+
+## Role-Based Access
+
+- **Users**: Can browse and fill surveys
+- **Moderators**: Can create and manage surveys, but cannot manage users
+- **Admins**: Full access including user management
 
 ## Technical Implementation
 

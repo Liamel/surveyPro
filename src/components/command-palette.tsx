@@ -77,10 +77,10 @@ export function CommandPalette() {
     {
       id: 'users',
       title: 'User Management',
-      description: 'Manage users and permissions',
+      description: 'Manage users and permissions (Admin only)',
       icon: <Users className="h-4 w-4" />,
-      action: () => router.push('/cms'),
-      keywords: ['users', 'user', 'management', 'permissions', 'people']
+      action: () => router.push('/cms/users'),
+      keywords: ['users', 'user', 'management', 'permissions', 'people', 'admin']
     }
   ];
 
@@ -100,6 +100,12 @@ export function CommandPalette() {
   useHotkeys('escape', () => {
     setIsOpen(false);
   }, { enableOnFormTags: true });
+
+  // Add hotkey for user management (Cmd+U or Ctrl+U)
+  useHotkeys('cmd+u, ctrl+u', (e) => {
+    e.preventDefault();
+    router.push('/cms/users');
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -165,6 +165,24 @@ surveypro/
 3. **Answer Questions**: Answer one question at a time
 4. **Complete**: Submit your responses and see the completion page
 
+## User Roles
+
+### User (Default)
+- Can browse and fill surveys
+- Basic access to the platform
+
+### Moderator
+- Can create and manage surveys
+- Can edit survey questions and settings
+- Cannot manage other users
+- Access to CMS dashboard with survey management tools
+
+### Admin
+- Full access to all features
+- Can manage user roles and permissions
+- Can create, edit, and delete surveys
+- Access to user management dashboard
+
 ## Database Schema
 
 ### Users
@@ -173,7 +191,7 @@ surveypro/
 - `email` (Text)
 - `first_name` (Text)
 - `last_name` (Text)
-- `role` (Text, Default: 'user')
+- `role` (Text, Default: 'user') - 'user', 'moderator', 'admin'
 
 ### Surveys
 - `id` (UUID, Primary Key)

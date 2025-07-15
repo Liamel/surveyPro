@@ -2,8 +2,9 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, Users } from 'lucide-react';
 import Link from 'next/link';
+import { getCurrentUser } from '@/lib/auth';
 import StatsCards from '@/components/cms/stats-cards';
 import StatsCardsSkeleton from '@/components/cms/stats-cards-skeleton';
 import RecentSurveys from '@/components/cms/recent-surveys';
@@ -19,7 +20,11 @@ export default async function CMSPage() {
   if (!userId) {
     redirect('/');
   }
-  
+
+  // Check if current user is admin or moderator
+  const currentUser = await getCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
+  const isModeratorOrAdmin = currentUser?.role === 'moderator' || currentUser?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -31,18 +36,30 @@ export default async function CMSPage() {
             <p className="text-gray-600 dark:text-gray-300">Create and manage your surveys</p>
           </div>
           <div className="flex space-x-2">
-            <Link href="/cms/manage" prefetch={true}>
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Manage Surveys
-              </Button>
-            </Link>
-            <Link href="/cms/create" prefetch={true}>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Survey
-              </Button>
-            </Link>
+            {isModeratorOrAdmin && (
+              <Link href="/cms/manage" prefetch={true}>
+                <Button variant="outline">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Surveys
+                </Button>
+              </Link>
+            )}
+            {isModeratorOrAdmin && (
+              <Link href="/cms/create" prefetch={true}>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Survey
+                </Button>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link href="/cms/users" prefetch={true}>
+                <Button variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  User Management
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
